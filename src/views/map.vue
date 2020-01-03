@@ -6,8 +6,8 @@
     >
     </div>
     <div class="tuceng">
-        <button @click="addWeixin">卫星图</button>
-        <button @click="deleteWeixin">夜景图</button>
+      <button @click="addWeixin">卫星图</button>
+      <button @click="deleteWeixin">夜景图</button>
     </div>
   </div>
 </template>
@@ -15,7 +15,7 @@
 <script>
 
 import AMap from "AMap"
-
+var infoWindow
 export default {
   data() {
     return {
@@ -28,7 +28,7 @@ export default {
         { location: "120.475348,31.671264", color: 1 }
       ],
       satellite: null,
-      map:null
+      map: null
     }
   },
   mounted() {
@@ -38,7 +38,7 @@ export default {
     // 初始化
     MapInit() {
       let _this = this;
-     this.map = new AMap.Map("map", {
+      this.map = new AMap.Map("map", {
         center: [120.47471, 31.675743],
         mapStyle: "amap://styles/darkblue", //设置地图的显示样式
         resizeEnable: true,
@@ -55,7 +55,6 @@ export default {
           liteStyle: true
         }));
       })
-      
 
       // 根据color状态展示不同的图片
       const style = [
@@ -98,6 +97,7 @@ export default {
         });
       }
       console.log(locationData)
+
       // 点放置
       let mass = new AMap.MassMarks(locationData, {
         opacity: 0.8,
@@ -108,25 +108,69 @@ export default {
 
       let marker = new AMap.Marker({ content: " ", map: _this.map });
 
-      mass.on("mouseover", function (e) {
-        console.log(e)
+      infoWindow = new AMap.InfoWindow({
+        infoTitle: '<strong style="font-size: 15px">' + 1 + '</strong>',
+        infoBody: ['<div class="guideWrapper" style="display: flex; justify-content: space-between;">',
+          '<div style="font-size: 14px">' + 22 + '</div>&nbsp;',
+          '<div><i class="icon iconfont icon-daohang"/></div>',
+          '</div>'].join(''),
+        // 基点指向marker的头部位置（信息窗体的具体位置）
+        offset: new AMap.Pixel(0, -31)
+      })
+
+      var lnglats = [
+        [120.476636, 31.672926],
+        [120.471293, 31.674497],
+        [120.474748, 31.679098],
+        [120.479168, 31.675976],
+        [120.480091, 31.673839],
+        [120.475348, 31.671264],
+      ];
+
+      for (var i = 0; i < lnglats.length; i++) {
+        var ss = new AMap.Marker({
+          position: lnglats[i],
+          map: this.map
+        });
+        ss.content = '我是第' + (i + 1) + '个Marker';
+        ss.on('click', this.markerClick);
+        ss.emit('click', { target: marker });
+      }
+
+      mass.on("click", function (e) {
+        console.log(e.data.lnglat)
         marker.setPosition(e.data.lnglat); //用户相对应的经纬度
         marker.setLabel({ content: e.data.name }); //用户相对应的名字
+
+        const lng = e.data.lnglat.lng
+        const lat = e.data.lnglat.lat
+
+        var position = new AMap.LngLat(lng, lat);
+
+        console.log(infoWindow)
+
+        infoWindow.open(this.map, position);
+        console.log(11)
       });
+
       mass.setMap(this.map);
 
 
-    //   console.log( this.satellite)
+      //   console.log( this.satellite)
     },
-    addWeixin(){
+    addWeixin() {
       this.satellite = new AMap.TileLayer.Satellite({
         map: this.map,
       });
     },
-    deleteWeixin(){
-      if(this.satellite){
+    deleteWeixin() {
+      if (this.satellite) {
         this.satellite.setMap(null);
       }
+    },
+    markerClick(e) {
+        infoWindow.setContent(e.target.content);
+        infoWindow.open(this.map, e.target.getPosition());
     }
   }
 
@@ -139,15 +183,16 @@ export default {
   width: 100%;
   height: 600px;
 }
-.amap-logo,.amap-copyright{
-    display: none!important;
+.amap-logo,
+.amap-copyright {
+  display: none !important;
 }
-.map_box{
-    position: relative;
+.map_box {
+  position: relative;
 }
-.tuceng{
-    position: absolute;
-    top: 0;
-    display: flex
+.tuceng {
+  position: absolute;
+  top: 0;
+  display: flex;
 }
 </style>
