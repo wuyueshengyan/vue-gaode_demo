@@ -7,21 +7,14 @@ import Map from '../views/map.vue'
 Vue.use(VueRouter)
 
 const routes = [{
-        path: '/',
-        name: 'home',
-        component: Home
-    }, {
-        path: '/map',
-        name: 'map',
-        component: Map
-    },
-    {
-        path: '/about',
-        name: 'about',
-        component: () =>
-            import ( /* webpackChunkName: "about" */ '../views/About.vue')
-    }
-]
+    path: '/',
+    name: 'home',
+    component: Home
+}, {
+    path: '/map',
+    name: 'map',
+    component: Map
+}]
 
 const router = new VueRouter({
     routes
