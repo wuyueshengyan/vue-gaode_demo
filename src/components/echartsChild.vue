@@ -22,11 +22,16 @@
       },
       props:["id","data"],
       mounted() {
+        
           this.drawLineGraph(this.id,this.data);
- 
+      },
+      created(){
+        console.log('子组件')
       },
       methods:{
         drawLineGraph(id,data){
+          console.log(id)
+          console.log(id)
           let _this = this;
           let myChart = document.getElementById(id)
           this.ChartLineGraph = this.$echarts.init(myChart)
