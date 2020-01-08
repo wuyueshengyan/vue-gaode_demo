@@ -16,7 +16,18 @@
         @click="changeCenter"
       >自适应中心点</button>
     </div>
+    <div
+      class="right"
+      :class="{shengji_animation_show : animation,shengji_animation_showC : animationC}"
+    >
+      右侧菜单展示栏
+      
+        <ul>
+          <li v-for="(item,index) in dataList" :key="index" @click="clickRightDian(item.location)">{{item.name}}</li>
+        </ul>
 
+      <button class="shouqi" @click="shou">收起</button>
+    </div>
     <!-- <eChartsChild :id="'bargraph'" :data="option2" style="height:350px;"></eChartsChild> -->
   </div>
 </template>
@@ -35,6 +46,8 @@ export default {
   },
   data() {
     return {
+      animation: false,
+      animationC:false,
       id: 'bargraph2',
       option2: {
         title: {
@@ -75,17 +88,17 @@ export default {
 
       },
       dataList: [
-        { location: "120.476636,31.672926", color: 2 },
-        { location: "120.471293,31.674497", color: 1 },
-        { location: "120.474748,31.679098", color: 1 },
-        { location: "120.479168,31.675976", color: 1 },
-        { location: "120.480091,31.673839", color: 1 },
-        { location: "120.475348,31.671264", color: 1 }
+        { location: "120.476636,31.672926", color: 2 , name:'点1'},
+        { location: "120.471293,31.674497", color: 1 ,name:'点2'},
+        { location: "120.474748,31.679098", color: 1 ,name:'点3'},
+        { location: "120.479168,31.675976", color: 1 ,name:'点4'},
+        { location: "120.480091,31.673839", color: 1 ,name:'点5'},
+        { location: "120.475348,31.671264", color: 1 ,name:'点6'}
       ],
       satellite: null,
       lastDian: {
         lng: 0,
-       lat: 0,
+        lat: 0,
       }
     }
   },
@@ -122,16 +135,16 @@ export default {
         'AMap.Geolocation',
       ], function () {
         // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
-        map.addControl(new AMap.ToolBar());
+        map.addControl(new AMap.ToolBar({ liteStyle: true }));
 
         // 在图面添加比例尺控件，展示地图在当前层级和纬度下的比例尺
-        map.addControl(new AMap.Scale());
+        // map.addControl(new AMap.Scale());
 
         // 在图面添加类别切换控件，实现默认图层与卫星图、实施交通图层之间切换的控制
         map.addControl(new AMap.MapType());
 
         // 在图面添加定位控件，用来获取和展示用户主机所在的经纬度位置
-        map.addControl(new AMap.Geolocation());
+        // map.addControl(new AMap.Geolocation());
       });
 
       // 根据color状态展示不同的图片
@@ -194,14 +207,15 @@ export default {
       // 高德地图自适应你想标记的点的显示区域
       map.setFitView();
     },
+    // 点击地图覆盖物事件
     markerAutoCenter(e) {
       var center = map.getCenter(); //获取当前地图中心位置
       // 2.拿到本次经纬度
       let currentDian = e.target.B.position
-      console.log(center)
+      // console.log(center)
       // 1.判断上次有无点击点，上次没有点击的点的话，就不执行里面的操作，保存点就行，首先需要上次的点击点的经纬度
       if (this.lastDian.lng) {
-        console.log(e.target.B.position)
+        // console.log(e.target.B.position)
         // 3.计算两个点之间经纬度的差值
         let reslat = currentDian.lat - this.lastDian.lat
         let reslng = currentDian.lng - this.lastDian.lng
@@ -214,6 +228,22 @@ export default {
       // 6.保存本地点击的点，方便下次计算
       this.lastDian.lng = currentDian.lng
       this.lastDian.lat = currentDian.lat
+
+      this.domChange()
+    },
+    clickRightDian(location){
+      console.log(location)
+      let newLocation = location.split(',')
+      map.setCenter(newLocation);
+    },
+    shou(){
+      this.animation = false
+      this.animationC = true
+    },
+    domChange() {
+      this.animation = true
+      this.animationC = false
+      console.log(this.animation)
     },
     closebiaodian() {
       // false 参数的话不会清除覆盖物
@@ -273,6 +303,7 @@ export default {
 }
 .map_box {
   position: relative;
+  overflow: hidden;
 }
 .tuceng {
   position: absolute;
@@ -284,5 +315,61 @@ export default {
   background: #fff;
   width: 300px;
   height: 300px;
+}
+.right {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  z-index: 9999;
+  width: 300px;
+  height: 100%;
+  transform: translatex(300px);
+  background-color: #fff;
+  text-align: center;
+}
+ul li{
+ margin: 2px;
+  width: 100px;
+  height: 20px;
+  line-height: 20px;
+  background: #ccc;
+  list-style: none;
+  cursor: pointer;
+}
+.shengji_animation_show {
+  animation-duration: 1s;
+  animation-name: fadeinB;
+  transform: translatex(0px);
+}
+@keyframes fadeinB {
+  0% {
+    opacity: 0;
+    transform: translatex(300px);
+  }
+  100% {
+    opacity: 1;
+    transform: translatex(0px);
+  }
+}
+
+.shengji_animation_showC {
+  animation-duration: 1s;
+  animation-name: fadeinC;
+  transform: translatex(300px);
+}
+@keyframes fadeinC {
+  0% {
+    opacity: 1;
+    transform: translatex(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translatex(300px);
+  }
+}
+.shouqi{
+    position: absolute;
+    top: 50%;
+    left: 0;
 }
 </style>
