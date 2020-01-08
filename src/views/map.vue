@@ -83,9 +83,10 @@ export default {
         { location: "120.475348,31.671264", color: 1 }
       ],
       satellite: null,
-      cejulist: [],
-      diancejulist:[],
-      wenzicejulist:[]
+      lastDian: {
+        lng: 0,
+       lat: 0,
+      }
     }
   },
   mounted() {
@@ -107,8 +108,6 @@ export default {
         zoom: 16
       });
 
-      // ruler = new AMap.RangingTool(map)
-
       map.plugin(["AMap.MouseTool"], function () {
         //在地图中添加MouseTool插件
         mouseTool = new AMap.MouseTool(map)
@@ -127,7 +126,6 @@ export default {
 
         // 在图面添加比例尺控件，展示地图在当前层级和纬度下的比例尺
         map.addControl(new AMap.Scale());
-
 
         // 在图面添加类别切换控件，实现默认图层与卫星图、实施交通图层之间切换的控制
         map.addControl(new AMap.MapType());
@@ -160,13 +158,11 @@ export default {
       let status = null;
       for (let i = 0; i < _this.dataList.length; i++) {
         let locationArr = _this.dataList[i].location.split(",");
-
         locationData.push({
           lnglat: locationArr,
           style: status // 对应的status相对应的样式 style
         });
       }
-      // console.log(locationData)
 
       let marker = new AMap.Marker({ content: " ", map: _this.map });
 
@@ -190,19 +186,42 @@ export default {
         markers.content = '我是第' + (i + 1) + '个Marker的信息窗口';
         markers.on('mousemove', this.markerClick);
         markers.emit('mousemove', { target: marker });
+
+        markers.on('click', this.markerAutoCenter);
+        // markers.emit('click', { target: marker });
       }
       markers.setMap(map);
       // 高德地图自适应你想标记的点的显示区域
       map.setFitView();
+    },
+    markerAutoCenter(e) {
+      var center = map.getCenter(); //获取当前地图中心位置
+      // 2.拿到本次经纬度
+      let currentDian = e.target.B.position
+      console.log(center)
+      // 1.判断上次有无点击点，上次没有点击的点的话，就不执行里面的操作，保存点就行，首先需要上次的点击点的经纬度
+      if (this.lastDian.lng) {
+        console.log(e.target.B.position)
+        // 3.计算两个点之间经纬度的差值
+        let reslat = currentDian.lat - this.lastDian.lat
+        let reslng = currentDian.lng - this.lastDian.lng
+        // 4.当前中心点加差值
+        let lat = center.lat + reslat
+        let lng = center.lng + reslng
+        // 5.重新设置中心点
+        map.setCenter([lng, lat]);
+      }
+      // 6.保存本地点击的点，方便下次计算
+      this.lastDian.lng = currentDian.lng
+      this.lastDian.lat = currentDian.lat
     },
     closebiaodian() {
       // false 参数的话不会清除覆盖物
       mouseTool.close(true)//关闭，并清除覆盖物
 
     },
+    // 标点工具
     biaodian() {
-            
-      
       mouseTool.marker();
     },
     ceju() {
