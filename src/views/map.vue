@@ -9,14 +9,13 @@
       <button @click="addWeixin">卫星图</button>
       <button @click="deleteWeixin">夜景图</button>
       <button @click="ceju">测距</button>
-      <button @click="dellceju">删除测距</button>
       <button @click="biaodian">标点</button>
+      <button @click="closebiaodian">删除鼠标工具</button>
       <button
         id="setFitView"
         @click="changeCenter"
       >自适应中心点</button>
     </div>
-    
 
     <!-- <eChartsChild :id="'bargraph'" :data="option2" style="height:350px;"></eChartsChild> -->
   </div>
@@ -84,7 +83,9 @@ export default {
         { location: "120.475348,31.671264", color: 1 }
       ],
       satellite: null,
-
+      cejulist: [],
+      diancejulist:[],
+      wenzicejulist:[]
     }
   },
   mounted() {
@@ -96,7 +97,7 @@ export default {
       infoWindow = new AMap.InfoWindow({
         // isCustom: true,  //使用自定义窗体
         offset: new AMap.Pixel(0, -30)
-      });
+      })
       let _this = this;
       map = new AMap.Map("map", {
         center: [120.47471, 31.675743],
@@ -106,13 +107,13 @@ export default {
         zoom: 16
       });
 
-      ruler = new AMap.RangingTool(map)
+      // ruler = new AMap.RangingTool(map)
 
-      map.plugin(["AMap.MouseTool"], function() {
+      map.plugin(["AMap.MouseTool"], function () {
         //在地图中添加MouseTool插件
-           mouseTool = new AMap.MouseTool(map)
-           
-          });
+        mouseTool = new AMap.MouseTool(map)
+
+      });
 
       AMap.plugin([
         'AMap.ToolBar',
@@ -194,15 +195,18 @@ export default {
       // 高德地图自适应你想标记的点的显示区域
       map.setFitView();
     },
-    biaodian(){
-      mouseTool.marker();  
+    closebiaodian() {
+      // false 参数的话不会清除覆盖物
+      mouseTool.close(true)//关闭，并清除覆盖物
+
     },
-    dellceju(){
-      ruler.turnOff();
+    biaodian() {
+            
+      
+      mouseTool.marker();
     },
     ceju() {
-      ruler.turnOff();
-      ruler.turnOn();
+      mouseTool.rule();
     },
     addWeixin() {
       this.satellite = new AMap.TileLayer.Satellite({
@@ -233,7 +237,7 @@ export default {
     changeCenter() {
       // 无参数传入的情况下 默认包括所有覆盖物的情况 map.setFitView();
       var newCenter = map.setFitView();
-      document.getElementById('centerCoord').innerHTML = '当前中心点坐标：' + newCenter.getCenter();
+      // document.getElementById('centerCoord').innerHTML = '当前中心点坐标：' + newCenter.getCenter();
     }
   }
 }
