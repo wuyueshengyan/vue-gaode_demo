@@ -40,6 +40,8 @@ var infoWindow
 var map
 var ruler
 var mouseTool
+var gaoliangdian
+var dingshiqi
 export default {
   components: {
     eChartsChild
@@ -232,9 +234,33 @@ export default {
       this.domChange()
     },
     clickRightDian(location){
-      console.log(location)
+     if(gaoliangdian){
+        map.remove(gaoliangdian)
+        clearTimeout(dingshiqi)
+     }
       let newLocation = location.split(',')
       map.setCenter(newLocation);
+      var position = new AMap.LngLat(...newLocation);
+       // 点标记显示内容，HTML要素字符串
+    var markerContent = '' +
+        '<div class="custom-content-marker">' +
+        '   <img src="https://s2.ax1x.com/2020/01/09/lRjD3j.png">' +
+        '</div>';
+
+     gaoliangdian = new AMap.Marker({
+        position: position,
+        // 将 html 传给 content
+        content: markerContent,
+        // 以 icon 的 [center bottom] 为原点
+        offset: new AMap.Pixel(-13, -50)
+    });
+
+    // 将 markers 添加到地图
+    map.add(gaoliangdian);
+        // 清除 marker
+
+   dingshiqi=  setTimeout(()=>{map.remove(gaoliangdian)},5000)
+
     },
     shou(){
       this.animation = false
@@ -372,4 +398,15 @@ ul li{
     top: 50%;
     left: 0;
 }
+  .custom-content-marker {
+            position: relative;
+            width: 25px;
+            height: 34px;
+        }
+
+        .custom-content-marker img {
+            width: 100%;
+            height: 100%;
+        }
+
 </style>
